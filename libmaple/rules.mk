@@ -1,10 +1,11 @@
 # Standard things
 sp              := $(sp).x
 dirstack_$(sp)  := $(d)
-d               := $(dir)
-BUILDDIRS       += $(BUILD_PATH)/$(d)
+d               := $(subst :,_,$(dir))
+d               := $(subst $(backslash),_,$(d))
+BUILDDIRS       += $(BUILD_PATH)/$(dir)
 
-LIBMAPLE_INCLUDES := -I$(LIBMAPLE_PATH)/include -I$(LIBMAPLE_MODULE_SERIES)/include
+LIBMAPLE_INCLUDES := -I$(LIBMAPLE_PATH)\include -I$(LIBMAPLE_MODULE_SERIES)\include
 LIBMAPLE_PRIVATE_INCLUDES := -I$(LIBMAPLE_PATH)
 
 # Local flags
@@ -33,11 +34,15 @@ ifeq ($(MCU_SERIES),stm32f1)
 cSRCS_$(d) += i2c.c
 endif
 
-cFILES_$(d) := $(cSRCS_$(d):%=$(d)/%)
-sFILES_$(d) := $(sSRCS_$(d):%=$(d)/%)
+cFILES_$(d) := $(cSRCS_$(d):%=$(dir)/%)
+sFILES_$(d) := $(sSRCS_$(d):%=$(dir)/%)
 
 OBJS_$(d) := $(cFILES_$(d):%.c=$(BUILD_PATH)/%.o) $(sFILES_$(d):%.S=$(BUILD_PATH)/%.o)
 DEPS_$(d) := $(OBJS_$(d):%.o=%.d)
+
+CFLAGS_$(d) := $(subst :,\:,$(CFLAGS_$(d)))
+
+$(warning $(CFLAGS_$(d)))
 
 $(OBJS_$(d)): TGT_CFLAGS := $(CFLAGS_$(d))
 $(OBJS_$(d)): TGT_ASFLAGS :=

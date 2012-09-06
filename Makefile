@@ -20,6 +20,27 @@ LDDIR := $(SUPPORT_PATH)/ld
 # Support files for this Makefile
 MAKEDIR := $(SUPPORT_PATH)/make
 BOARD_INCLUDE_DIR := $(MAKEDIR)/board-includes
+DUMMY := 
+backslash := \$(DUMMY)
+
+##
+## Come one. Come all. And pick a platform (windows, linux, osx)
+##
+PLATFORM := windows
+
+##
+## Some OS abstraction constants (a.k.a. Constants that let libmaple
+## also be compiled on windows)
+##
+ifneq ($(PLATFORM), windows)
+RM := rm
+NULLDEVICE := /dev/null
+COMMAND_SEPARATOR := ;
+else
+RM := cs-rm
+NULLDEVICE := NUL
+COMMAND_SEPARATOR := &
+endif
 
 ##
 ## Target-specific configuration.  This determines some compiler and
@@ -83,12 +104,18 @@ ifneq ($(USER_MODULES),)
 LIBMAPLE_MODULES += $(USER_MODULES)
 endif
 
+$(warning $(LIBMAPLE_MODULES))
+
 # Call each module's rules.mk:
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))
 
 ##
 ## Targets
 ##
+
+# Escape Semi-Colons. These mostly show up in windows
+BUILDDIRS := $(subst :,drive,$(BUILDDIRS))
+BUILDDIRS := $(subst $(backslash),/,$(BUILDDIRS))
 
 # main target
 include $(SRCROOT)/build-targets.mk
@@ -116,16 +143,16 @@ install: $(BUILD_PATH)/$(BOARD).bin
 PREV_BUILD_TYPE = $(shell cat $(BUILD_PATH)/build-type 2>/dev/null)
 build-check:
 ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
-	$(shell rm -rf $(BUILD_PATH))
+	$(shell $(RM) -rf $(BUILD_PATH))
 endif
 
 sketch: build-check MSG_INFO $(BUILD_PATH)/$(BOARD).bin
 
 clean:
-	rm -rf build
+	$(RM) -rf build
 
 mrproper: clean
-	rm -rf doxygen
+	$(RM) -rf doxygen
 
 help:
 	@echo ""
@@ -159,7 +186,7 @@ help:
 	@echo ""
 
 cscope:
-	rm -rf cscope.*
+	$(RM) -rf cscope.*
 	find . -name '*.[hcS]' -o -name '*.cpp' | xargs cscope -b
 
 tags:

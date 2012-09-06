@@ -3,7 +3,7 @@ $(BUILD_PATH)/main.o: $(SRCROOT)/main.cpp
 	$(SILENT_CXX) $(CXX) $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 $(BUILD_PATH)/libmaple.a: $(BUILDDIRS) $(TGT_BIN)
-	- rm -f $@
+	- $(RM) -f $@
 	$(AR) crv $(BUILD_PATH)/libmaple.a $(TGT_BIN)
 
 library: $(BUILD_PATH)/libmaple.a
@@ -14,19 +14,31 @@ $(BUILD_PATH)/$(BOARD).elf: $(BUILDDIRS) $(TGT_BIN) $(BUILD_PATH)/main.o
 	$(SILENT_LD) $(CXX) $(LDFLAGS) -o $@ $(TGT_BIN) $(BUILD_PATH)/main.o -Wl,-Map,$(BUILD_PATH)/$(BOARD).map
 
 $(BUILD_PATH)/$(BOARD).bin: $(BUILD_PATH)/$(BOARD).elf
-	$(SILENT_OBJCOPY) $(OBJCOPY) -v -Obinary $(BUILD_PATH)/$(BOARD).elf $@ 1>/dev/null
+	$(SILENT_OBJCOPY) $(OBJCOPY) -v -Obinary $(BUILD_PATH)/$(BOARD).elf $@
 	$(SILENT_DISAS) $(DISAS) -d $(BUILD_PATH)/$(BOARD).elf > $(BUILD_PATH)/$(BOARD).disas
 	@echo " "
 	@echo "Object file sizes:"
+ifneq ($(PLATFORM), windows)
 	@find $(BUILD_PATH) -iname *.o | xargs $(SIZE) -t > $(BUILD_PATH)/$(BOARD).sizes
 	@cat $(BUILD_PATH)/$(BOARD).sizes
+else
+	@echo " - To be implemented in windows! soon!"
+endif
 	@echo " "
 	@echo "Final Size:"
+ifneq ($(PLATFORM), windows)
 	@$(SIZE) $<
 	@echo $(MEMORY_TARGET) > $(BUILD_PATH)/build-type
+else
+	@echo " - To be implemented in windows! soon!"
+endif
 
 $(BUILDDIRS):
+ifneq ($(PLATFORM), windows)
 	@mkdir -p $@
+else
+	@mkdir $(subst /,\,$@)
+endif
 
 MSG_INFO:
 	@echo "================================================================================"

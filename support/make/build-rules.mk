@@ -11,15 +11,15 @@ SIZE     := arm-none-eabi-size
 DFU      := dfu-util
 
 # Suppress annoying output unless V is set
-ifndef V
-   SILENT_CC       = @echo '  [CC]       ' $(@:$(BUILD_PATH)/%.o=%.c);
-   SILENT_AS       = @echo '  [AS]       ' $(@:$(BUILD_PATH)/%.o=%.S);
-   SILENT_CXX      = @echo '  [CXX]      ' $(@:$(BUILD_PATH)/%.o=%.cpp);
-   SILENT_LD       = @echo '  [LD]       ' $(@F);
+ifdef V
+   SILENT_CC       = @echo '  [CC]       ' $(@:$(BUILD_PATH)/%.o=%.c) $(COMMAND_SEPARATOR)
+   SILENT_AS       = @echo '  [AS]       ' $(@:$(BUILD_PATH)/%.o=%.S) $(COMMAND_SEPARATOR)
+   SILENT_CXX      = @echo '  [CXX]      ' $(@:$(BUILD_PATH)/%.o=%.cpp) $(COMMAND_SEPARATOR)
+   SILENT_LD       = @echo '  [LD]       ' $(@F) $(COMMAND_SEPARATOR)
    SILENT_AR       = @echo '  [AR]       '
-   SILENT_OBJCOPY  = @echo '  [OBJCOPY]  ' $(@F);
-   SILENT_DISAS    = @echo '  [DISAS]    ' $(@:$(BUILD_PATH)/%.bin=%).disas;
-   SILENT_OBJDUMP  = @echo '  [OBJDUMP]  ' $(OBJDUMP);
+   SILENT_OBJCOPY  = @echo '  [OBJCOPY]  ' $(@F) $(COMMAND_SEPARATOR)
+   SILENT_DISAS    = @echo '  [DISAS]    ' $(@:$(BUILD_PATH)/%.bin=%).disas $(COMMAND_SEPARATOR)
+   SILENT_OBJDUMP  = @echo '  [OBJDUMP]  ' $(OBJDUMP) $(COMMAND_SEPARATOR)
 endif
 
 # Extra build configuration
